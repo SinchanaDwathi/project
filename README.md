@@ -1,4 +1,4 @@
-**EcoWaste - Waste Management System Dashboard**
+**Ecoverve - Waste Management System Dashboard**
 
 **Overview**
 EcoWaste is a web-based dashboard application for tracking and managing waste collection. The system allows waste management administrators to log collections, monitor bin statuses, and view collection analytics through a user-friendly interface built with HTML, Tailwind CSS, and JavaScript.
