@@ -62,7 +62,7 @@ In today's fast-paced world, effective waste management is crucial. Our Smart Wa
 
 -Run the following command:
 
-You can find the source code for this project on GitHub: [Your Repository Name](https://github.com/yourusername/your-repository)
+You can find the source code for this project on GitHub: [Your Repository Name]`(https://github.com/yourusername/your-repository)`
 
 
 
