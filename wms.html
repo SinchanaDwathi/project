@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Waste Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css">
+    <style>
+        /* Add your CSS styles here */
+        :root {
+            --primary: #4CAF50;
+            --secondary: #2E7D32;
+            --accent: #8BC34A;
+            --text: #333;
+            --background: #f5f5f5;
+            --card: #fff;
+            --danger: #f44336;
+            --warning: #ff9800;
+            --success: #4CAF50;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text);
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logo h1 {
+            font-size: 1.5rem;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        nav a:hover {
+            background-color: var(--secondary);
+        }
+        
+        main {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background-color: var(--card);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            color: var(--text);
+            font-weight: 600;
+        }
+        
+        .stat {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+            color: var(--primary);
+        }
+        
+        .stat-description {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+        
+        #map {
+            height: 500px;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        
+        .alert-container {
+            margin-bottom: 2rem;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .alert-warning {
+            background-color: #FFF3E0;
+            border-left: 4px solid var(--warning);
+            color: #E65100;
+        }
+        
+        .alert-danger {
+            background-color: #FFEBEE;
+            border-left: 4px solid var(--danger);
+            color: #C62828;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary);
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-collected {
+            background-color: #E3F2FD;
+            color: #1565C0;
+        }
+        
+        .status-processed {
+            background-color: #E8F5E9;
+            color: #2E7D32;
+        }
+        
+        .status-recycled {
+            background-color: #F9FBE7;
+            color: #827717;
+        }
+        
+        .fill-level {
+            width: 100%;
+            height: 6px;
+            background-color: #eee;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .fill-bar {
+            height: 100%;
+            background-color: var(--primary);
+        }
+        
+        .critical .fill-bar {
+            background-color: var(--danger);
+        }
+        
+        .warning .fill-bar {
+            background-color: var(--warning);
+        }
+        
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .footer-section {
+            flex: 1;
+            margin: 0 1rem;
+        }
+        
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .footer-section ul {
+            list-style: none;
+        }
+        
+        .footer-section li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-section a {
+            color: #ddd;
+            text-decoration: none;
+        }
+        
+        .footer-section a:hover {
+            color: var(--accent);
+        }
+        
+        .copyright {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #555;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .row {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+            }
+            
+            .footer-section {
+                margin-bottom: 2rem;
+            }
+            
+            nav ul {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-recycle fa-2x"></i>
+            <h1>Smart Waste Management System</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#" class="active">Dashboard</a></li>
+                <li><a href="#">Bins</a></li>
+                <li><a href="#">Vehicles</a></li>
+                <li><a href="#">Facilities</a></li>
+                <li><a href="#">Reports</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <div class="dashboard">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Total Waste Collected</div>
+                    <i class="fas fa-trash-alt"></i>
+                </div>
+                <div class="stat">28,450 kg</div>
+                <div class="stat-description">+12% from last month</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Recycling Rate</div>
+                    <i class="fas fa-recycle"></i>
+                </div>
+                <div class="stat">68.2%</div>
+                <div class="stat-description">+5.3% from last month</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Active Bins</div>
+                    <i class="fas fa-dumpster"></i>
+                </div>
+                <div class="stat">254</div>
+                <div class="stat-description">12 bins need attention</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Collection Vehicles</div>
+                    <i class="fas fa-truck"></i>
+                </div>
+                <div class="stat">18</div>
+                <div class="stat-description">5 currently on routes</div>
+            </div>
+        </div>
+        
+        <div class="alert-container">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Alerts</div>
+                    <i class="fas fa-bell"></i>
+                </div>
+                
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div>
+                        <strong>Critical Fill Level</strong>
+                        <p>Bin ID: WB-103 at Downtown Plaza has reached 95% capacity</p>
+                    </div>
+                    <button class="btn btn-primary">Dispatch</button>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>High Fill Level</strong>
+                        <p>Bin ID: WB-078 at Central Park has reached 82% capacity</p>
+                    </div>
+                    <button class="btn btn-primary">Dispatch</button>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>High Fill Level</strong>
+                        <p>Bin ID: WB-156 at Main Street has reached 80% capacity</p>
+                    </div>
+                    <button class="btn btn-primary">Dispatch</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Waste Collection Map</div>
+                <div>
+                    <button class="btn btn-primary">Optimize Routes</button>
+                </div>
+            </div>
+            <div id="map"></div>
+        </div>
+        
+        <div class="row">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Waste Composition</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="wasteCompositionChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Monthly Collection Trends</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="monthlyTrendsChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Recycling Performance</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="recyclingPerformanceChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Carbon Footprint Reduction</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="carbonFootprintChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Bins Requiring Attention</div>
+                <div>
+                    <button class="btn btn-primary">View All Bins</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Bin ID</th>
+                            <th>Location</th>
+                            <th>Type</th>
+                            <th>Fill Level</th>
+                            <th>Last Collection</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>WB-103</td>
+                            <td>Downtown Plaza</td>
+                            <td>Mixed</td>
+                            <td>
+                                <div class="fill-level critical">
+                                    <div class="fill-bar" style="width: 95%"></div>
+                                </div>
+                                <span>95%</span>
+                            </td>
+                            <td>2 days ago</td>
+                            <td><span class="status status-collected">Critical</span></td>
+                            <td>
+                                <button class="btn btn-primary">Collect</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>WB-078</td>
+                            <td>Central Park</td>
+                            <td>Plastic</td>
+                            <td>
+                                <div class="fill-level warning">
+                                    <div class="fill-bar" style="width: 82%"></div>
+                                </div>
+                                <span>82%</span>
+                            </td>
+                            <td>3 days ago</td>
+                            <td><span class="status status-collected">Warning</span></td>
+                            <td>
+                                <button class="btn btn-primary">Collect</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>WB-156</td>
+                            <td>Main Street</td>
+                            <td>Paper</td>
+                            <td>
+                                <div class="fill-level warning">
+                                    <div class="fill-bar" style="width: 80%"></div>
+                                </div>
+                                <span>80%</span>
+                            </td>
+                            <td>1 day ago</td>
+                            <td><span class="status status-collected">Warning</span></td>
+                            <td>
+                                <button class="btn btn-primary">Collect</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>WB-042</td>
+                            <td>Riverside Park</td>
+                            <td>Organic</td>
+                            <td>
+                                <div class="fill-level">
+                                    <div class="fill-bar" style="width: 65%"></div>
+                                </div>
+                                <span>65%</span>
+                            </td>
+                            <td>5 days ago</td>
+                            <td><span class="status status-processed">Normal</span></td>
+                            <td>
+                                <button class="btn btn-primary">Collect</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>WB-118</td>
+                            <td>Hospital Zone</td>
+                            <td>Hazardous</td>
+                            <td>
+                                <div class="fill-level">
+                                    <div class="fill-bar" style="width: 58%"></div>
+                                </div>
+                                <span>58%</span>
+                            </td>
+                            <td>2 days ago</td>
+                            <td><span class="status status-processed">Normal</span></td>
+                            <td>
+                                <button class="btn btn-primary">Collect</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Recent Transactions</div>
+                <div>
+                    <button class="btn btn-primary">View All</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Date</th>
+                            <th>Waste Type</th>
+                            <th>Amount</th>
+                            <th>Source</th>
+                            <th>Destination</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>TRX-2023-1845</td>
+                            <td>Today, 10:23 AM</td>
+                            <td>Plastic</td>
+                            <td>125 kg</td>
+                            <td>Downtown Plaza</td>
+                            <td>Central Recycling Facility</td>
+                            <td><span class="status status-collected">Collected</span></td>
+                        </tr>
+                        <tr>
+                            <td>TRX-2023-1844</td>
+                            <td>Today, 09:15 AM</td>
+                            <td>Organic</td>
+                            <td>87 kg</td>
+                            <td>Riverside Park</td>
+                            <td>Compost Facility</td>
+                            <td><span class="status status-processed">Processed</span></td>
+                        </tr>
+                        <tr>
+                            <td>TRX-2023-1843</td>
+                            <td>Yesterday, 3:45 PM</td>
+                            <td>Glass</td>
+                            <td>65 kg</td>
+                            <td>Business District</td>
+                            <td>Glass Recycling Plant</td>
+                            <td><span class="status status-recycled">Recycled</span></td>
+                        </tr>
+                        <tr>
+                            <td>TRX-2023-1842</td>
+                            <td>Yesterday, 2:30 PM</td>
+                            <td>Paper</td>
+                            <td>103 kg</td>
+                            <td>University Campus</td>
+                            <td>Paper Processing Plant</td>
+                            <td><span class="status status-recycled">Recycled</span></td>
+                        </tr>
+                        <tr>
+                            <td>TRX-2023-1841</td>
+                            <td>Yesterday, 11:20 AM</td>
+                            <td>Metal</td>
+                            <td>58 kg</td>
+                            <td>Industrial Zone</td>
+                            <td>Metal Recycling Center</td>
+                            <td><span class="status status-processed">Processed</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Smart Waste Management</h3>
+                <p>Innovative solutions for a cleaner, greener future.</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#">Dashboard</a></li>
+                    <li><a href="#">Bins</a></li>
+                    <li><a href="#">Vehicles</a></li>
+                    <li><a href="#">Facilities</a></li>
+                    <li><a href="#">Reports</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <ul>
+                    <li><i class="fas fa-envelope"></i> info@smartwaste.com</li>
+                    <li><i class="fas fa-phone"></i> +1 (555) 123-4567</li>
+                    <li><i class="fas fa-map-marker-alt"></i> 123 Green Street, Eco City</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            <p>&copy; 2023 Smart Waste Management System. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Initialize map
+        const map = L.map('map').setView([40.7128, -74.0060], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Add bin markers
+        const bins = [
+            { id: 'WB-103', lat: 40.7128, lng: -74.0060, fillLevel: 95, type: 'Mixed' },
+            { id: 'WB-078', lat: 40.7145, lng: -74.0075, fillLevel: 82, type: 'Plastic' },
+            { id: 'WB-156', lat: 40.7160, lng: -74.0090, fillLevel: 80, type: 'Paper' },
+            { id: 'WB-042', lat: 40.7135, lng: -74.0100, fillLevel: 65, type: 'Organic' },
+            { id: 'WB-118', lat: 40.7150, lng: -74.0040, fillLevel: 58, type: 'Hazardous' },
+            { id: 'WB-023', lat: 40.7110, lng: -74.0080, fillLevel: 45, type: 'Glass' },
+            { id: 'WB-087', lat: 40.7175, lng: -74.0065, fillLevel: 30, type: 'Metal' },
+            { id: 'WB-092', lat: 40.7190, lng: -74.0030, fillLevel: 20, type: 'Electronic' }
+        ];
+        
+        bins.forEach(bin => {
+            let binColor = '#4CAF50'; // default green
+            if (bin.fillLevel >= 90) {
+                binColor = '#f44336'; // red for critical
+            } else if (bin.fillLevel >= 75) {
+                binColor = '#ff9800'; // orange for warning
+            }
+            
+            const binMarker = L.circle([bin.lat, bin.lng], {
+                color: binColor,
+                fillColor: binColor,
+                fillOpacity: 0.6,
+                radius: 50
+            }).addTo(map);
+            
+            binMarker.bindPopup(`
+                <strong>Bin ID: ${bin.id}</strong><br>
+                Type: ${bin.type}<br>
+                Fill Level: ${bin.fillLevel}%<br>
+                <button onclick="alert('Collection scheduled for ${bin.id}')" style="background-color: #4CAF50; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; margin-top: 5px;">Schedule Collection</button>
+            `);
+        });
+        
+        // Add facility markers
+        const facilities = [
+            { name: 'Central Recycling Facility', lat: 40.7200, lng: -74.0100 },
+            { name: 'Compost Facility', lat: 40.7050, lng: -74.0150 },
+            { name: 'Glass Recycling Plant', lat: 40.7250, lng: -74.0050 }
+        ];
+        
+        facilities.forEach(facility => {
+            const facilityIcon = L.icon({
+                iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34]
+            });
+            
+            const facilityMarker = L.marker([facility.lat, facility.lng], { icon: facilityIcon }).addTo(map);
+            
+            facilityMarker.bindPopup(`
+                <strong>${facility.name}</strong><br>
+                Status: Operational<br>
+                Capacity: 65% utilized
+            `);
+        });
+        
+        // Add vehicle markers
+        const vehicles = [
+            { id: 'V-001', lat: 40.7140, lng: -74.0070, status: 'On Route' },
+            { id: 'V-002', lat: 40.7180, lng: -74.0080, status: 'On Route' }
+        ];
+        
+        vehicles.forEach(vehicle => {
+            const vehicleIcon = L.divIcon({
+                html: '<i class="fas fa-truck" style="color: #1565C0; font-size: 20px;"></i>',
+                className: 'vehicle-icon',
+                iconSize: [20, 20]
+            });
+            
+            const vehicleMarker = L.marker([vehicle.lat, vehicle.lng], { icon: vehicleIcon }).addTo(map);
+            
+            vehicleMarker.bindPopup(`
+                <strong>Vehicle ID: ${vehicle.id}</strong><br>
+                Status: ${vehicle.status}<br>
+                Load: 45% of capacity<br>
+                ETA to next bin: 8 mins
+            `);
+        });
+        
+        // Initialize charts
+        const wasteCompositionCtx = document.getElementById('wasteCompositionChart').getContext('2d');
+        const wasteCompositionChart = new Chart(wasteCompositionCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Organic', 'Plastic', 'Paper', 'Glass', 'Metal', 'Electronic', 'Hazardous'],
+                datasets: [{
+                    data: [35, 22, 18, 12, 8, 3, 2],
+                    backgroundColor: [
+                        '#8BC34A', '#2196F3', '#FFC107', '#9C27B0', '#F44336', '#607D8B', '#FF5722'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+        
+        const monthlyTrendsCtx = document.getElementById('monthlyTrendsChart').getContext('2d');
+        const monthlyTrendsChart = new Chart(monthlyTrendsCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Waste Collected (tons)',
+                    data: [22, 25, 28, 26, 30, 28],
+                    borderColor: '#4CAF50',
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 20
+                    }
+                }
+            }
+        });
+        
+        const recyclingPerformanceCtx = document.getElementById('recyclingPerformanceChart').getContext('2d');
+        const recyclingPerformanceChart = new Chart(recyclingPerformanceCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Recycling Rate (%)',
+                    data: [58, 61, 63, 65, 67, 68],
+                    backgroundColor: '#2196F3'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 50,
+                        max: 75
+                    }
+                }
+            }
+        });
+        
+        const carbonFootprintCtx = document.getElementById('carbonFootprintChart').getContext('2d');
+        const carbonFootprintChart = new Chart(carbonFootprintCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'CO2 Saved (tons)',
+                    data: [12, 15, 18, 20, 22, 25],
+                    borderColor: '#8BC34A',
+                    backgroundColor: 'rgba(139, 195, 74, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 10
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
