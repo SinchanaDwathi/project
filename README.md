@@ -19,7 +19,7 @@ In today's fast-paced world, effective waste management is crucial. Our Smart Wa
 **Reduced Operational Costs**: The system reduces the need for manual monitoring and minimizes the risk of errors or inaccuracies.
 **Enhanced Environmental Sustainability**: The system promotes environmental sustainability by reducing waste sent to landfills and increasing recycling rates.
 **Better Decision Making**: The system provides data-driven insights to inform decision making and optimize waste management strategies.
-**Scalability**: The system's modular design and use of open-source technologies make it easy to scale up or down to meet the needs of growing or changing waste management operations.
+**Scalability**: The system's modular design and use of open-source technologies make it easy to scale up or down to meet the needs of growing or changing waste management operations.                              
 **Flexibility**: The system's flexibility and customizability make it easy to adapt to changing waste management regulations, technologies, or operational requirements.
 
 **Technical Requirements**
