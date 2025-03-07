@@ -5,11 +5,17 @@ In today's fast-paced world, effective waste management is crucial. Our Smart Wa
 **Key Features**
 
 **Real-time Monitoring**: The system tracks the fill levels of waste bins and receives alerts for bins that require immediate attention.
+
 **Interactive Map**: The system visualizes the locations of bins, collection vehicles, and recycling facilities on an interactive map.
+
 **Data Analytics**: The system generates reports on waste collection trends, recycling rates, and carbon footprint reduction.
+
 **User-Friendly Dashboard**: The system provides an intuitive dashboard interface to access key metrics and alerts.
+
 **Transaction Management**: The system keeps track of waste collection transactions, including waste types and amounts.
+
 **Conveyor Belt Integration**: The system integrates with conveyor belts to track and manage waste movement.
+
 **Sensor Integration**: The system integrates with sensors to track waste levels, temperature, and other environmental factors in real-time.
 
 **Benefits**
